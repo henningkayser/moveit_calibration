@@ -40,6 +40,7 @@
 namespace moveit_rviz_plugin
 {
 const std::string LOGNAME = "handeye_control_widget";
+const std::string MOVEIT_CPP_NS = "/seg_0";
 
 ProgressBarWidget::ProgressBarWidget(QWidget* parent, int min, int max, int value) : QWidget(parent)
 {
@@ -232,7 +233,7 @@ ControlTabWidget::ControlTabWidget(QWidget* parent)
       new planning_scene_monitor::PlanningSceneMonitor("robot_description", tf_buffer_, "planning_scene_monitor"));
   if (planning_scene_monitor_)
   {
-    planning_scene_monitor_->startSceneMonitor("move_group/monitored_planning_scene");
+    planning_scene_monitor_->startSceneMonitor("/moveit_cpp/monitored_planning_scene");
     std::string service_name = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE;
     if (planning_scene_monitor_->requestPlanningSceneState(service_name))
     {
@@ -243,7 +244,7 @@ ControlTabWidget::ControlTabWidget(QWidget* parent)
         try
         {
           moveit::planning_interface::MoveGroupInterface::Options opt(group_name_->currentText().toStdString());
-          opt.node_handle_ = nh_;
+          opt.node_handle_ = ros::NodeHandle(MOVEIT_CPP_NS);
           move_group_.reset(
               new moveit::planning_interface::MoveGroupInterface(opt, tf_buffer_, ros::WallDuration(30, 0)));
         }
@@ -656,7 +657,7 @@ void ControlTabWidget::planningGroupNameChanged(const QString& text)
     try
     {
       moveit::planning_interface::MoveGroupInterface::Options opt(group_name_->currentText().toStdString());
-      opt.node_handle_ = nh_;
+      opt.node_handle_ = ros::NodeHandle(MOVEIT_CPP_NS);
       move_group_.reset(new moveit::planning_interface::MoveGroupInterface(opt, tf_buffer_, ros::WallDuration(30, 0)));
 
       // Clear the joint values aligning with other group
